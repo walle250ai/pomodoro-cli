@@ -39,17 +39,87 @@ class PomodoroTimer:
         sys.stdout.flush()
 
     def play_sound(self):
+        import subprocess
+        import shutil
+
         if sys.platform == 'win32':
             import winsound
             winsound.Beep(1000, 500)
             winsound.Beep(800, 500)
             winsound.Beep(1000, 500)
+        elif sys.platform == 'darwin':
+            if shutil.which('afplay'):
+                try:
+                    for freq in [800, 600, 800]:
+                        subprocess.run(
+                            ['afplay', '/System/Library/Sounds/Glass.aiff'],
+                            check=False,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL
+                        )
+                        time.sleep(0.15)
+                    return
+                except Exception:
+                    pass
         else:
-            print('\a', end='', flush=True)
-            time.sleep(0.1)
-            print('\a', end='', flush=True)
-            time.sleep(0.1)
-            print('\a', end='', flush=True)
+            sound_files = [
+                '/usr/share/sounds/alsa/Front_Center.wav',
+                '/usr/share/sounds/Yaru/stereo/bell.oga',
+                '/usr/share/sounds/purple/alert.wav',
+                '/usr/share/sounds/freedesktop/stereo/bell.oga',
+            ]
+
+            if shutil.which('paplay'):
+                for sound_file in sound_files:
+                    if os.path.exists(sound_file):
+                        try:
+                            for _ in range(3):
+                                subprocess.run(
+                                    ['paplay', sound_file],
+                                    check=False,
+                                    stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL
+                                )
+                                time.sleep(0.15)
+                            return
+                        except Exception:
+                            continue
+
+            if shutil.which('aplay'):
+                for sound_file in sound_files:
+                    if os.path.exists(sound_file):
+                        try:
+                            for _ in range(3):
+                                subprocess.run(
+                                    ['aplay', '-q', sound_file],
+                                    check=False,
+                                    stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL
+                                )
+                                time.sleep(0.15)
+                            return
+                        except Exception:
+                            continue
+
+            if shutil.which('play'):
+                try:
+                    for freq in [800, 600, 800]:
+                        subprocess.run(
+                            ['play', '-n', 'synth', '0.3', 'sine', str(freq), 'vol', '0.3'],
+                            check=False,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL
+                        )
+                        time.sleep(0.05)
+                    return
+                except Exception:
+                    pass
+
+        print('\a', end='', flush=True)
+        time.sleep(0.1)
+        print('\a', end='', flush=True)
+        time.sleep(0.1)
+        print('\a', end='', flush=True)
 
     def run_session(self, minutes, session_type):
         self.current_session = session_type

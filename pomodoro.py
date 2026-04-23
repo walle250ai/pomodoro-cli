@@ -50,7 +50,7 @@ class PomodoroTimer:
         elif sys.platform == 'darwin':
             if shutil.which('afplay'):
                 try:
-                    for freq in [800, 600, 800]:
+                    for _ in range(3):
                         subprocess.run(
                             ['afplay', '/System/Library/Sounds/Glass.aiff'],
                             check=False,
@@ -140,7 +140,8 @@ class PomodoroTimer:
                 self.total_rest_seconds += total_seconds
 
             self.clear_line()
-            print(f"✨ {session_type}阶段完成！已完成: {self.format_time(total_seconds)}")
+            label = "工作" if session_type == "work" else "休息"
+            print(f"✨ {label}阶段完成！已完成: {self.format_time(total_seconds)}")
             self.play_sound()
             
         except KeyboardInterrupt:
